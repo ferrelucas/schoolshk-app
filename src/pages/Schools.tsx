@@ -2,7 +2,6 @@ import React, { useState, useMemo } from 'react';
 import { useSchools } from '../hooks/useSchools';
 import type { SchoolFilters } from '../types/school';
 import SchoolTable from '../components/SchoolTable';
-import SchoolMap from '../components/SchoolMap';
 import FilterPanel from '../components/FilterPanel';
 
 const Schools: React.FC = () => {
@@ -14,7 +13,6 @@ const Schools: React.FC = () => {
     session: 'all',
     studentsGender: 'all'
   });
-  const [viewMode, setViewMode] = useState<'table' | 'map'>('table');
 
   const filteredSchools = useMemo(() => {
     return schools.filter(school => {
@@ -60,32 +58,13 @@ const Schools: React.FC = () => {
           onFiltersChange={setFilters}
           schools={schools}
         />
-        
-        <div className="view-toggle">
-          <button 
-            className={viewMode === 'table' ? 'active' : ''} 
-            onClick={() => setViewMode('table')}
-          >
-            Table View
-          </button>
-          <button 
-            className={viewMode === 'map' ? 'active' : ''} 
-            onClick={() => setViewMode('map')}
-          >
-            Map View
-          </button>
-        </div>
       </div>
 
       <div className="results-count">
         Showing {filteredSchools.length} of {schools.length} schools
       </div>
 
-      {viewMode === 'table' ? (
-        <SchoolTable schools={filteredSchools} />
-      ) : (
-        <SchoolMap schools={filteredSchools} />
-      )}
+      <SchoolTable schools={filteredSchools} />
     </div>
   );
 };
