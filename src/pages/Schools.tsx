@@ -65,6 +65,10 @@ const Schools: React.FC = () => {
       </div>
 
       <SchoolTable schools={filteredSchools} />
+      
+      <footer className="page-footer">
+        <p>Made with ❤️ by <strong>ferrelucas</strong></p>
+      </footer>
     </div>
   );
 };

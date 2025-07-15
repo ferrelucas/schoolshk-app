@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import type { School, SchoolFilters } from '../types/school';
 
 interface FilterPanelProps {
@@ -8,18 +8,26 @@ interface FilterPanelProps {
 }
 
 const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChange, schools }) => {
-  const districts = [...new Set(schools.map(school => school.DISTRICT))].sort();
-  const schoolLevels = [...new Set(schools.map(school => school['SCHOOL LEVEL']))].sort();
-  const financeTypes = [...new Set(schools.map(school => school['FINANCE TYPE']))].sort();
-  const sessions = [...new Set(schools.map(school => school.SESSION))].sort();
-  const studentsGenders = [...new Set(schools.map(school => school['STUDENTS GENDER']))].sort();
+  const { districts, schoolLevels, financeTypes, sessions, studentsGenders } = useMemo(() => {
+    return {
+      districts: [...new Set(schools.map(school => school.DISTRICT))].sort(),
+      schoolLevels: [...new Set(schools.map(school => school['SCHOOL LEVEL']))].sort(),
+      financeTypes: [...new Set(schools.map(school => school['FINANCE TYPE']))].sort(),
+      sessions: [...new Set(schools.map(school => school.SESSION))].sort(),
+      studentsGenders: [...new Set(schools.map(school => school['STUDENTS GENDER']))].sort()
+    };
+  }, [schools]);
 
-  const handleFilterChange = (key: keyof SchoolFilters, value: string) => {
+  const handleFilterChange = useCallback((key: keyof SchoolFilters, value: string) => {
     onFiltersChange({
       ...filters,
       [key]: value
     });
-  };
+  }, [filters, onFiltersChange]);
+
+  const handleResetFilters = useCallback(() => {
+    onFiltersChange({ level: 'all', category: 'all', district: 'all', session: 'all', studentsGender: 'all' });
+  }, [onFiltersChange]);
 
   return (
     <div className="filter-panel">
@@ -95,7 +103,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChange, sch
 
       <button 
         className="reset-filters"
-        onClick={() => onFiltersChange({ level: 'all', category: 'all', district: 'all', session: 'all', studentsGender: 'all' })}
+        onClick={handleResetFilters}
       >
         Reset Filters
       </button>
