@@ -1,13 +1,17 @@
-import React, { useMemo, useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
+import type React from 'react';
 import type { School, SchoolFilters } from '../types/school';
 
 interface FilterPanelProps {
   filters: SchoolFilters;
   onFiltersChange: (filters: SchoolFilters) => void;
   schools: School[];
+  search: string;
+  onSearchChange: (value: string) => void;
+  onReset: () => void;
 }
 
-const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChange, schools }) => {
+const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChange, schools, search, onSearchChange, onReset }) => {
   const { districts, schoolLevels, financeTypes, sessions, studentsGenders } = useMemo(() => {
     return {
       districts: [...new Set(schools.map(school => school.DISTRICT))].sort(),
@@ -25,12 +29,20 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChange, sch
     });
   }, [filters, onFiltersChange]);
 
-  const handleResetFilters = useCallback(() => {
-    onFiltersChange({ level: 'all', category: 'all', district: 'all', session: 'all', studentsGender: 'all' });
-  }, [onFiltersChange]);
-
   return (
     <div className="filter-panel">
+      <div className="filter-group filter-search">
+        <label htmlFor="search">Search:</label>
+        <input
+          type="search"
+          id="search"
+          className="search-input"
+          placeholder="Search by name, address or district…"
+          value={search}
+          onChange={(e) => onSearchChange(e.target.value)}
+        />
+      </div>
+
       <div className="filter-group">
         <label htmlFor="level">School Level:</label>
         <select 
@@ -101,12 +113,11 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChange, sch
         </select>
       </div>
 
-      <button 
-        className="reset-filters"
-        onClick={handleResetFilters}
-      >
-        Reset Filters
-      </button>
+      <div className="filter-actions">
+        <button type="button" className="link-button" onClick={onReset}>
+          Reset filters
+        </button>
+      </div>
     </div>
   );
 };

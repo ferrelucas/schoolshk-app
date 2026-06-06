@@ -31,19 +31,35 @@ const MapComponent: React.FC<{ schools: School[] }> = ({ schools }) => {
     }
   }, [map]);
 
-  React.useEffect(() => {
-    if (map && schools.length > 0) {
-      // Clear existing markers
-      schools.forEach(school => {
-        if (school.LATITUDE && school.LONGITUDE) {
-          const marker = new google.maps.Marker({
-            position: { lat: school.LATITUDE, lng: school.LONGITUDE },
-            map: map,
-            title: school['ENGLISH NAME'],
-          });
+  const markersRef = React.useRef<google.maps.Marker[]>([]);
+  const infoWindowRef = React.useRef<google.maps.InfoWindow | null>(null);
 
-          const infoWindow = new google.maps.InfoWindow({
-            content: `
+  React.useEffect(() => {
+    if (!map) return;
+
+    // Clear markers from a previous render
+    markersRef.current.forEach(m => m.setMap(null));
+    markersRef.current = [];
+
+    if (!infoWindowRef.current) {
+      infoWindowRef.current = new google.maps.InfoWindow();
+    }
+    const infoWindow = infoWindowRef.current;
+
+    const bounds = new google.maps.LatLngBounds();
+    let placed = 0;
+
+    schools.forEach(school => {
+      if (school.LATITUDE && school.LONGITUDE) {
+        const position = { lat: school.LATITUDE, lng: school.LONGITUDE };
+        const marker = new google.maps.Marker({
+          position,
+          map,
+          title: school['ENGLISH NAME'],
+        });
+
+        marker.addListener('click', () => {
+          infoWindow.setContent(`
               <div>
                 <h3>${school['ENGLISH NAME']}</h3>
                 <p><strong>Level:</strong> ${school['SCHOOL LEVEL']}</p>
@@ -55,14 +71,22 @@ const MapComponent: React.FC<{ schools: School[] }> = ({ schools }) => {
                 <p><strong>Phone:</strong> ${school.TELEPHONE}</p>
                 ${school.WEBSITE ? `<p><a href="${school.WEBSITE}" target="_blank">Visit Website</a></p>` : ''}
               </div>
-            `,
-          });
+            `);
+          infoWindow.open(map, marker);
+        });
 
-          marker.addListener('click', () => {
-            infoWindow.open(map, marker);
-          });
-        }
-      });
+        markersRef.current.push(marker);
+        bounds.extend(position);
+        placed++;
+      }
+    });
+
+    // Zoom/pan to fit whatever schools are currently shown
+    if (placed === 1) {
+      map.setCenter(bounds.getCenter());
+      map.setZoom(15);
+    } else if (placed > 1) {
+      map.fitBounds(bounds);
     }
   }, [map, schools]);
 
@@ -70,12 +94,12 @@ const MapComponent: React.FC<{ schools: School[] }> = ({ schools }) => {
 };
 
 const SchoolMap: React.FC<SchoolMapProps> = ({ schools }) => {
-  const apiKey = import.meta.env.REACT_APP_GOOGLE_MAPS_API_KEY;
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
   if (!apiKey) {
     return (
       <div className="map-error">
-        <p>Google Maps API key is required. Please set REACT_APP_GOOGLE_MAPS_API_KEY in your environment variables.</p>
+        <p>Google Maps API key is required. Please set VITE_GOOGLE_MAPS_API_KEY in your environment variables.</p>
       </div>
     );
   }
