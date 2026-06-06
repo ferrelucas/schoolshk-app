@@ -26,6 +26,7 @@ const MapComponent: React.FC<{ schools: School[] }> = ({ schools }) => {
       const newMap = new google.maps.Map(mapRef.current, {
         center: { lat: 22.3193, lng: 114.1694 }, // Hong Kong center
         zoom: 11,
+        gestureHandling: 'greedy',
       });
       setMap(newMap);
     }
@@ -90,7 +91,7 @@ const MapComponent: React.FC<{ schools: School[] }> = ({ schools }) => {
     }
   }, [map, schools]);
 
-  return <div ref={mapRef} style={{ width: '100%', height: '600px' }} />;
+  return <div ref={mapRef} style={{ width: '100%', height: '100%', minHeight: '300px' }} />;
 };
 
 const SchoolMap: React.FC<SchoolMapProps> = ({ schools }) => {
