@@ -127,6 +127,16 @@ const Schools: React.FC = () => {
               <h2>{filteredSchools.length} schools on map</h2>
               <button className="modal-close" onClick={() => setShowMap(false)} aria-label="Close map">✕</button>
             </div>
+            <div className="modal-filters">
+              <FilterPanel
+                filters={filters}
+                onFiltersChange={setFilters}
+                schools={schools}
+                search={search}
+                onSearchChange={setSearch}
+                onReset={handleReset}
+              />
+            </div>
             <div className="modal-body">
               <SchoolMap schools={filteredSchools} />
             </div>
